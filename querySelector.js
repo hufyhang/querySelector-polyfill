@@ -1,8 +1,16 @@
+/*
+ * querySelector & querySelectorAll Polyfill
+ *
+ * 2015-12-27
+ *
+ * By Feifei Hang, http://feifeihang.info
+ * Public Domain.
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ */
 'use strict';
 ( function() {
-
-HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
-HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
+// HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
+// HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
 
 // Some utility methods.
 var trim = function trim(str) {
