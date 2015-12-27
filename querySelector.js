@@ -1,7 +1,8 @@
 'use strict';
 (function () {
 
-  document.querySelectorAll = document.querySelector = undefined;
+  HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
+  HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
 
   // Some utility methods.
   var trim = function trim (str) {
@@ -30,6 +31,7 @@
   };
 
   var getElementsBySelector = function getElementsBySelector (selector) {
+    var context = this;
     var temp, tempElements, elements = [];
 
     // IDs. e.g. #mail-title
@@ -64,14 +66,14 @@
 
     // Get By Elements
     if (els.length !== 0) {
-      var temps = document.getElementsByTagName(els[0]);
+      var temps = context.getElementsByTagName(els[0]);
       tempElements = tempElements.concat(Array.prototype.slice.call(temps));
     }
 
     // Get By Class
     for (var i = 0, l = classes.length; i !== l; ++i) {
       var className = classes[i].substring(1);
-      var temps = document.getElementsByClassName(className);
+      var temps = context.getElementsByClassName(className);
       temps = Array.prototype.slice.call(temps);
       // If no temp elements yet, push into tempElements directly.
       if (tempElements.length === 0) {
@@ -130,9 +132,13 @@
     return elements;
   };
 
-  // document.querySelectorAll
-  if (!document.querySelectorAll) {
-    document.querySelectorAll = function querySelectorAll (selector) {
+  // querySelectorAll
+  if (!document.querySelectorAll ||
+      !HTMLElement.prototype.querySelectorAll ||
+      !HTMLDocument.prototype.querySelectorAll) {
+    document.querySelectorAll =
+    HTMLDocument.prototype.querySelectorAll =
+    HTMLElement.prototype.querySelectorAll = function querySelectorAll (selector) {
       if (typeof selector !== 'string') {
         throw new TypeError('document.querySelectorAll: Invalid selector type. ' +
                             'Expect: string. Found: ' + typeof selector + '.');
@@ -150,7 +156,7 @@
 
         // TODO: Support ' ' and '>'
 
-        elements = elements.concat(getElementsBySelector(rule));
+        elements = elements.concat(getElementsBySelector.call(this, rule));
       }
 
       return elements;
@@ -158,11 +164,15 @@
   }
 
 
-  // document.querySelector
-  if (!document.querySelector) {
-    document.querySelector = function querySelector (selector) {
-      var elements = document.querySelectorAll(selector);
-      return elements.length > 0 ? elements : null;
+  // querySelector
+  if (!document.querySelector ||
+      !HTMLElement.prototype.querySelector ||
+      !HTMLDocument.prototype.querySelector) {
+    document.querySelector =
+    HTMLDocument.prototype.querySelector =
+    HTMLElement.prototype.querySelector = function querySelector (selector) {
+      var elements = this.querySelectorAll(selector);
+      return elements.length > 0 ? elements[0] : null;
     };
   }
 
