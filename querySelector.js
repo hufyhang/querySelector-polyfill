@@ -116,7 +116,7 @@
       tempElements = [];
       for (var i = 0, l = prevs.length; i !== l; ++i) {
         var t = prevs[i];
-        var shouldAdd = false;
+        var shouldAdd = true;
         for (var key in attrs) {
           var lastChar = key.charAt(key.length - 1);
           if (/[\^\*\$]$/.test(key)) {
@@ -124,24 +124,24 @@
           }
           var tempAttr = t.getAttribute(key) || '';
           // Case: [href*=/en]
-          if (lastChar === '*' && tempAttr.indexOf(attrs[key + lastChar]) !== -1) {
-            shouldAdd = true;
+          if (lastChar === '*' && tempAttr.indexOf(attrs[key + lastChar]) === -1) {
+            shouldAdd = false;
             break;
           }
           // Case: [href^=/en]
-          else if (lastChar === '^' && tempAttr.indexOf(attrs[key + lastChar]) === 0) {
-            shouldAdd = true;
+          else if (lastChar === '^' && tempAttr.indexOf(attrs[key + lastChar]) !== 0) {
+            shouldAdd = false;
             break;
           }
           // Case: [href$=/en]
           else if (lastChar === '$' &&
-              tempAttr.indexOf(attrs[key + lastChar]) === tempAttr.length - attrs[key + lastChar].length) {
-             shouldAdd = true;
+              tempAttr.indexOf(attrs[key + lastChar]) !== tempAttr.length - attrs[key + lastChar].length) {
+             shouldAdd = false;
              break;
            }
           // Case: [href=/en]
-          else if (tempAttr === attrs[key]) {
-            shouldAdd = true;
+          else if (/[\$\*\^]/.test(lastChar) === false && tempAttr !== attrs[key]) {
+            shouldAdd = false;
             break;
           }
 
