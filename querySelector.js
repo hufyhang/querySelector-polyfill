@@ -111,6 +111,9 @@ var getElementsBySelector = function getElementsBySelector(selector) {
       attribute = attribute.substring(1, attribute.length - 1);
       var parts = attribute.split('=');
       parts = trim(parts);
+      if (parts[1] !== null) {
+        parts[1] = parts[1].substring(1, parts[1].length - 1);
+      }
       attrs[parts[0]] = parts[1];
     }
     var prevs = [];
