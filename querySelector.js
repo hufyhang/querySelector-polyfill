@@ -32,7 +32,14 @@
 
   var getElementsBySelector = function getElementsBySelector (selector) {
     var context = this;
-    var temp, tempElements, elements = [];
+    var temp, tempElements = [], elements = [];
+    selector = trim(selector);
+
+    // If selector starts with *, find all elements.
+    if (selector.charAt(0) === '*') {
+      var temps = context.getElementsByTagName('*');
+      tempElements = tempElements.concat(Array.prototype.slice.call(temps));
+    }
 
     // IDs. e.g. #mail-title
     temp = fetchSelector(selector, /#[\w-_]+/g);
@@ -55,7 +62,6 @@
     var els = temp.selectors;
     selector = temp.ruleStr;
 
-    tempElements = []; // Emptify tempElements.
     // Get By ID
     // ID is supposed to be unique.
     // More need to attach other selectors.
@@ -110,16 +116,41 @@
       tempElements = [];
       for (var i = 0, l = prevs.length; i !== l; ++i) {
         var t = prevs[i];
-        var shouldAdd = true;
+        var shouldAdd = false;
         for (var key in attrs) {
-          if (t.getAttribute(key) !== attrs[key]) {
-            shouldAdd = false;
+          var lastChar = key.charAt(key.length - 1);
+          if (/[\^\*\$]$/.test(key)) {
+            key = key.substring(0, key.length - 1);
+          }
+          var tempAttr = t.getAttribute(key) || '';
+          // Case: [href*=/en]
+          if (lastChar === '*' && tempAttr.indexOf(attrs[key + lastChar]) !== -1) {
+            shouldAdd = true;
             break;
           }
+          // Case: [href^=/en]
+          else if (lastChar === '^' && tempAttr.indexOf(attrs[key + lastChar]) === 0) {
+            shouldAdd = true;
+            break;
+          }
+          // Case: [href$=/en]
+          else if (lastChar === '$' &&
+              tempAttr.indexOf(attrs[key + lastChar]) === tempAttr.length - attrs[key + lastChar].length) {
+             shouldAdd = true;
+             break;
+           }
+          // Case: [href=/en]
+          else if (tempAttr === attrs[key]) {
+            shouldAdd = true;
+            break;
+          }
+
         }
-        if (shouldAdd) {
+
+         if (shouldAdd) {
           tempElements = tempElements.concat([t]);
         }
+
       }
 
     }
@@ -171,6 +202,10 @@
     document.querySelector =
     HTMLDocument.prototype.querySelector =
     HTMLElement.prototype.querySelector = function querySelector (selector) {
+      if (typeof selector !== 'string') {
+        throw new TypeError('document.querySelector: Invalid selector type. ' +
+                            'Expect: string. Found: ' + typeof selector + '.');
+      }
       var elements = this.querySelectorAll(selector);
       return elements.length > 0 ? elements[0] : null;
     };
