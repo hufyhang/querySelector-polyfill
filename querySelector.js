@@ -23,8 +23,11 @@ if (!String.prototype.trim) {
   };
 }
 
-HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
-HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
+// =================================================
+// Uncomment the below lines according to your code.
+// =================================================
+// HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
+// HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
 
 // Some utility methods.
 var slice = function slice(arr) {
