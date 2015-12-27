@@ -9,10 +9,36 @@
  */
 'use strict';
 ( function() {
-// HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
-// HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
+
+// IE 8 and below don't even have this...
+if (!HTMLElement) {
+  function HTMLElement() {};
+}
+
+// String.prototype.trim polyfill from MDN.
+// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/Trim
+if (!String.prototype.trim) {
+  String.prototype.trim = function() {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  };
+}
+
+HTMLDocument.prototype.querySelectorAll = HTMLDocument.prototype.querySelector = undefined;
+HTMLElement.prototype.querySelectorAll = HTMLElement.prototype.querySelector = undefined;
 
 // Some utility methods.
+var slice = function slice(arr) {
+  try { // try using .slice()
+    return Array.prototype.slice.call(arr);
+  } catch ( e ) {
+    // otherwise, manually create the array
+    var result = [];
+    for (var i = 0, l = arr.length; i !== l; ++i)
+      result = result.concat(arr[i]);
+    return result;
+  }
+};
+
 var trim = function trim(str) {
   if (typeof str === 'string') {
     return str.trim();
@@ -48,7 +74,7 @@ var getElementsBySelector = function getElementsBySelector(selector) {
   // If selector starts with *, find all elements.
   if (selector.charAt(0) === '*') {
     var temps = context.getElementsByTagName('*');
-    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
+    tempElements = tempElements.concat(slice(temps));
   }
 
   // IDs. e.g. #mail-title
@@ -83,14 +109,14 @@ var getElementsBySelector = function getElementsBySelector(selector) {
   // Get By Elements
   if (els.length !== 0) {
     var temps = context.getElementsByTagName(els[0]);
-    tempElements = tempElements.concat(Array.prototype.slice.call(temps));
+    tempElements = tempElements.concat(slice(temps));
   }
 
   // Get By Class
   for (var i = 0, l = classes.length; i !== l; ++i) {
     var className = classes[i].substring(1);
     var temps = context.getElementsByClassName(className);
-    temps = Array.prototype.slice.call(temps);
+    temps = slice(temps);
     // If no temp elements yet, push into tempElements directly.
     if (tempElements.length === 0) {
       tempElements = tempElements.concat(temps);
